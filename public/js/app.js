@@ -1,20 +1,24 @@
-import defaultExport from './view.js';
+import {renderList, syncButtonEventListener, submitEventListener} from './view.js';
+import {addEntry, displayEntries} from './model.js';
 (() => {
+
+    //feature checking service worker and connecting sw
     if (navigator.serviceWorker){
         window.addEventListener('load', ()=> {
             navigator.serviceWorker.register('/sw.js').then(() => {
                 return navigator.serviceWorker.ready
             }).then(reg => {
                 console.log('service worker registration is successful with scope of:', reg.scope)
-                document.querySelector('#sync').addEventListener('click', event =>{
+                syncButtonEventListener(()=> {
                     reg.sync.register('example-sync').catch(console.log)
-                })
+                });
             }
             ).catch(err=> {
                 console.log('There was an error registering service workers:', err)
             })
         })
     }
+    //feature checking indexedDB
     if (!window.indexedDB){
         console.log('no indexedDB support');
         return;
@@ -51,57 +55,22 @@ import defaultExport from './view.js';
         db.onerror = event => {//setting default error handling
             console.log('db error:', event.target.error)
         }
-
-        displayEntries()
-        //add eventlisteners for buttons
-        //put, post requests to sync
-        document.addEventListener('submit', event => {
-            event.preventDefault();
-            addEntry();
-
+        displayEntries(db, request => {
+            request.onsuccess = event => {
+                renderList(request.result)
+            }
         })
-        document.querySelector('#sync').addEventListener('click', event => {
-            //fetch()
+        submitEventListener(name => {
+            addEntry(db, name, request => {
+                request.onsuccess = event => {
+                    displayEntries(db, request => {
+                        request.onsuccess = event => {
+                            renderList(request.result)
+                        }
+                    })
+                }
+            })
         })
+    }
 
-    }
-    function addEntry(){
-        
-        var addEntryBox = document.querySelector('#addEntry')
-        if(addEntryBox.value.trim() == '') return; //if just spaces
-        var tx = db.transaction('synco', 'readwrite')
-        var store = tx.objectStore('synco')
-        var request = store.add({name: addEntryBox.value, changed: 1, date_created: new Date, date_updated: new Date})
-        addEntryBox.value = ''
-        request.onsuccess = event => {
-            displayEntries()
-        }
-        
-    }
-    function displayEntries(){
-        var displayBox = document.querySelector('#display')
-        //clear displayBox
-        for(let i = displayBox.children.length-1; i >= 0; i--){
-            displayBox.children[i].remove();
-        }
-        //add all names
-        var tx = db.transaction('synco', 'readonly')
-        var store = tx.objectStore('synco')
-        var request = store.getAll()
-        request.onsuccess = event => {
-            request.result.forEach(element => {
-                let li = document.createElement('li')
-                li.innerText = element.name
-                li.setAttribute('id', element.id)
-                displayBox.append(li)
-            });
-        }
-    }
-    function getEntries(){
-        var request = db.transaction('synco', 'readyonly').objectStore('synco').getAll()
-        request.onsuccess = event => {
-
-        }
-    }
-    
 })();

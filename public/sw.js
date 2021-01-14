@@ -29,9 +29,9 @@ self.addEventListener('fetch', event => {
 
 function sendToServer() {
     return new Promise((resolve, reject) => {
-        var db = indexedDB.open('synco');
-        db.onsuccess = event => {
-            db = event.target.result
+        var request = indexedDB.open('synco');
+        request.onsuccess = event => {
+            var db = event.target.result
             var changedEntries = []
             var changedValOnly = IDBKeyRange.only(1)
             var store = event.target.result.transaction('synco', 'readwrite').objectStore('synco')
@@ -76,6 +76,7 @@ function sendToServer() {
     })
 }
 
+//background sync
 self.onsync = event => {
     if (event.tag = 'example-sync'){
         event.waitUntil(sendToServer().then(msg => {
