@@ -1,6 +1,6 @@
 const db = require('./connection');
 const config = require('./config.json')['development']
-
+const {uTCtoLocal} = require('../ultilities/date')
 module.exports = {
     tableExists: () => {
         //detect if table already exists
@@ -49,24 +49,16 @@ module.exports = {
             })
     },
     createManyRows: (data, cb)=> {
-        /*              UTC Time                Local Time
-        Convert 2021-02-08T08:00:00.000Z -> "2021-02-08 00:00:00"
-
-        */
-
-
 
         var entries = ``
         data.tasks.forEach(task => {
-            task.date_created = new Date(task.date_created)
-            task.date_updated = new Date(task.date_updated)
-            let formated_date_created = `${task.date_created.getFullYear()}-${task.date_created.getMonth()+1}-${task.date_created.getDate()} ${task.date_created.getHours()}:${task.date_created.getMinutes()}:${task.date_created.getSeconds()}`;
-            let formated_date_updated = `${task.date_updated.getFullYear()}-${task.date_updated.getMonth()+1}-${task.date_updated.getDate()} ${task.date_updated.getHours()}:${task.date_updated.getMinutes()}:${task.date_updated.getSeconds()}`;
-            entries +=`("${task.id}", "${task.name}", ${task.changed}, "${formated_date_created}", "${formated_date_updated}"),`
+            let local_date_created = uTCtoLocal(task.date_created);
+            let local_date_updated = uTCtoLocal(task.date_updated);
+            entries +=`("${task.id}", "${task.name}", ${task.changed}, "${task.status}","${local_date_created}", "${local_date_updated}"),`
         })
         entries = entries.slice(0, -1)
         db.query(
-            `INSERT INTO indexeddb_mysql_syncing.tasks(id, name, changed, date_created, date_updated) VALUES ${entries}
+            `INSERT INTO indexeddb_mysql_syncing.tasks(id, name, changed, status, date_created, date_updated) VALUES ${entries} ON DUPLICATE KEY UPDATE name = VALUES(name), changed = VALUES(changed), status = VALUES(status), date_updated = VALUES(date_updated)
             `, (err, res) => {
                 if (err) {
                     throw err

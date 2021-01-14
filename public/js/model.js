@@ -18,7 +18,6 @@ function getAllEntries(db, cb){
             entries.push(cursor.value)
             cursor.continue();
         } else {
-            console.log(entries)
             cb(entries)
         }
     }
@@ -27,15 +26,17 @@ function getAllEntries(db, cb){
     }
 }
 
-function deleteEntryOffline(db, id, cb){
+function userDeleteEntry(db, id, cb){
     var tx = db.transaction('synco','readwrite')
     var store = tx.objectStore('synco')
-    var request = store.get(id)
+    var request = store.get(parseInt(id))
     request.onsuccess = event => {
         let entry = request.result
+        console.log(event)
         entry.changed = 1;
         entry.status = "deleted";
-        var requestPut = put(entry)
+        entry.date_updated = new Date;
+        var requestPut = store.put(entry)
         cb(requestPut)
         requestPut.onerror = event => {
             console.log('something very bad happened')
@@ -46,4 +47,4 @@ function deleteEntryOffline(db, id, cb){
     }
 }
 
-export {addEntry, getAllEntries}
+export {addEntry, getAllEntries, userDeleteEntry}

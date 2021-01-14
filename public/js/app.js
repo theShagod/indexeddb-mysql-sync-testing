@@ -1,5 +1,5 @@
 import {renderList, syncButtonEventListener, submitEventListener, deleteEventListener} from './view.js';
-import {addEntry, getAllEntries} from './model.js';
+import {addEntry, getAllEntries, userDeleteEntry} from './model.js';
 (() => {
 
     //feature checking service worker and connecting sw
@@ -65,7 +65,6 @@ import {addEntry, getAllEntries} from './model.js';
             addEntry(db, name, request => {
                 request.onsuccess = event => {
                     getAllEntries(db, data => {
-                        console.log('was here')
                         console.log(data)
                         if (data.length) renderList(data)
                     })
@@ -73,7 +72,11 @@ import {addEntry, getAllEntries} from './model.js';
             })
         })
         deleteEventListener(id => {
-            
+            userDeleteEntry(db, id, requestPut => {
+                requestPut.onsuccess = event => {
+                    console.log('user deleted entry of id:', id)
+                }
+            })
         })
     }
 

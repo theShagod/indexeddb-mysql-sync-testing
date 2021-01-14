@@ -43,6 +43,7 @@ function sendToServer() {
                     cursor.value.changed = 0;
                     let requestPut = store.put(cursor.value)
                     requestPut.onsuccess = event => {
+                        console.log(changedEntries)
                         changedEntries.push(cursor.value)
                         cursor.continue();
                     }
