@@ -1,0 +1,8 @@
+{
+    "development": {
+    "host":"localhost",
+    "user":"root",
+    "password": "newpassword",
+    "database": "indexeddb_mysql_syncing"
+    }
+}
