@@ -1,5 +1,5 @@
-import {renderList, syncButtonEventListener, submitEventListener} from './view.js';
-import {addEntry, displayEntries} from './model.js';
+import {renderList, syncButtonEventListener, submitEventListener, deleteEventListener} from './view.js';
+import {addEntry, getAllEntries} from './model.js';
 (() => {
 
     //feature checking service worker and connecting sw
@@ -36,6 +36,7 @@ import {addEntry, displayEntries} from './model.js';
                 var store = db.createObjectStore('synco', {keyPath: 'id', autoIncrement: true})
                 store.createIndex('by_name', 'name')
                 store.createIndex('by_changed', 'changed')
+                store.createIndex('by_status', 'status')
                 store.createIndex('by_date_created', 'date_created')
                 store.createIndex('by_date_updated', 'date_updated')
             case 1:
@@ -55,21 +56,24 @@ import {addEntry, displayEntries} from './model.js';
         db.onerror = event => {//setting default error handling
             console.log('db error:', event.target.error)
         }
-        displayEntries(db, request => {
-            request.onsuccess = event => {
-                renderList(request.result)
-            }
+        getAllEntries(db, data => {
+            if (data.length) renderList(data)
         })
+        
+        
         submitEventListener(name => {
             addEntry(db, name, request => {
                 request.onsuccess = event => {
-                    displayEntries(db, request => {
-                        request.onsuccess = event => {
-                            renderList(request.result)
-                        }
+                    getAllEntries(db, data => {
+                        console.log('was here')
+                        console.log(data)
+                        if (data.length) renderList(data)
                     })
                 }
             })
+        })
+        deleteEventListener(id => {
+            
         })
     }
 

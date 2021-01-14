@@ -26,5 +26,17 @@ function submitEventListener(cb){
         addEntryBox.value = ''
     })
 }
+function deleteEventListener(cb){
+    document.addEventListener('click', event => {
+        let target = event.target.closest('li');
+        if (!target) return;
+        let id = target.getAttribute("id")
+        if (id){
+            //remove item clicked on from <ul>
+            cb(id)
+            target.remove()
+        }
+    })
+}
 
-export {renderList, syncButtonEventListener, submitEventListener}
+export {renderList, syncButtonEventListener, submitEventListener, deleteEventListener}
