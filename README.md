@@ -45,3 +45,23 @@ there is no limit to the amount of data on indexeddb
 each user has there only table
 
 `status` - can only have `none`(default), `deleted`, `new`
+
+
+### multiple devices
+If user offline creates a row, `status` `new` will appear and then doesn't sync and creates a `new` row online
+`new` rows are changed by being deleted and readded to indexeddb (after the online rows are synced)
+
+
+### on a new device or need to sync with new data in mysql
+
+
+### Syncing event order
+ 1. get new entries in mysql by comparing id numbers add to `var entries` and add to `synco`
+ 2. open `syncoff` and `synco`
+ 3. get offline entries and add to `var entries` and add to `synco`
+ 4. get changed entries in `synco` and add to `var entries` (with ids so it puts instad of adds in mysql) and PUT to `synco`
+ 5. add `var entries` to mysql
+ 6. clear `syncoff`
+
+ DELETING NEEDS OT BE CHANGED
+ the id needs to be more specific like `synco1` and `syncoff1`

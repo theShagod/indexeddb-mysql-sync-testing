@@ -10,7 +10,7 @@ import {addEntry, getAllEntries, userDeleteEntry} from './model.js';
             }).then(reg => {
                 console.log('service worker registration is successful with scope of:', reg.scope)
                 syncButtonEventListener(()=> {
-                    reg.sync.register('example-sync').catch(console.log)
+                    reg.sync.register('example-sync').catch(msg => console.log('asdf',msg))
                 });
             }
             ).catch(err=> {
@@ -39,6 +39,12 @@ import {addEntry, getAllEntries, userDeleteEntry} from './model.js';
                 store.createIndex('by_status', 'status')
                 store.createIndex('by_date_created', 'date_created')
                 store.createIndex('by_date_updated', 'date_updated')
+                var storeOff = db.createObjectStore('syncoff', {keyPath: 'id', autoIncrement: true})
+                storeOff.createIndex('by_name', 'name')
+                storeOff.createIndex('by_changed', 'changed')
+                storeOff.createIndex('by_status', 'status')
+                storeOff.createIndex('by_date_created', 'date_created')
+                storeOff.createIndex('by_date_updated', 'date_updated')
             case 1:
                 
         }
@@ -65,7 +71,6 @@ import {addEntry, getAllEntries, userDeleteEntry} from './model.js';
             addEntry(db, name, request => {
                 request.onsuccess = event => {
                     getAllEntries(db, data => {
-                        console.log(data)
                         if (data.length) renderList(data)
                     })
                 }

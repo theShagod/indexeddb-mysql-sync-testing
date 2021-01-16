@@ -54,7 +54,12 @@ module.exports = {
         data.tasks.forEach(task => {
             let local_date_created = uTCtoLocal(task.date_created);
             let local_date_updated = uTCtoLocal(task.date_updated);
-            entries +=`("${task.id}", "${task.name}", ${task.changed}, "${task.status}","${local_date_created}", "${local_date_updated}"),`
+            if (!task.id) { //if task.id is null
+                id = "null"
+            } else {
+                id = toString(task.id)
+            }
+            entries +=`(${id}, "${task.name}", ${task.changed}, "${task.status}","${local_date_created}", "${local_date_updated}"),`
         })
         entries = entries.slice(0, -1)
         db.query(
@@ -66,7 +71,7 @@ module.exports = {
                 cb(res)
             })
     },
-    readRow: (where = 'true = true')=> {//default will do the full table
+    readRow: (where = 'true = true', cb)=> {//default will do the full table
         db.query(
             `SELECT * FROM indexeddb_mysql_syncing.tasks WHERE ${where}
             `,(err, res)=> {
@@ -74,7 +79,7 @@ module.exports = {
                     console.log(err)
                     return;
                 }
-                console.log(res)
+                cb(res)
             })
     },
     updateRow: (name, id)=>{

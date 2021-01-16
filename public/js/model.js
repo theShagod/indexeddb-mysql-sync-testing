@@ -1,8 +1,8 @@
 function addEntry(db, name, cb){
-    var tx = db.transaction('synco', 'readwrite')
-    var store = tx.objectStore('synco')
-    var request = store.add({name: name, changed: 1, status: "none", date_created: new Date, date_updated: new Date})
-        cb(request)
+    var tx = db.transaction('syncoff', 'readwrite')
+    var store = tx.objectStore('syncoff')
+    var request = store.add({name: name, changed: 1, status: "new", date_created: new Date, date_updated: new Date})
+    cb(request)
 }
 
 
@@ -18,7 +18,16 @@ function getAllEntries(db, cb){
             entries.push(cursor.value)
             cursor.continue();
         } else {
-            cb(entries)
+            var requestOff = db.transaction('syncoff', 'readonly').objectStore('syncoff').index("by_status").openCursor(IDBKeyRange.bound("new","none",false, false))
+            requestOff.onsuccess = event => {
+                var cursor = requestOff.result
+                if (cursor) {
+                    entries.push(cursor.value)
+                    cursor.continue();    
+                } else {
+                    cb(entries)
+                }
+            }
         }
     }
     request.onerror =event => {
@@ -32,7 +41,6 @@ function userDeleteEntry(db, id, cb){
     var request = store.get(parseInt(id))
     request.onsuccess = event => {
         let entry = request.result
-        console.log(event)
         entry.changed = 1;
         entry.status = "deleted";
         entry.date_updated = new Date;
