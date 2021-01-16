@@ -11,17 +11,18 @@ app.use(express.static('public'))
 
 app.post('/', (req, res)=> {
     //data should look like this: {id: 1, name: "task", change: 0, date_created: somedate, date_updated: somedate}
-    if (req.body.length){
+    if (req.body.tasks.length){
         orm.createManyRows(req.body, result => {
             res.redirect('/')
         })
+    } else {
+        console.log('no data received')
     }
-    console.log('no data received')
+    
     
 })
 
 app.get('/id/:id', (req, res)=> {
-    console.log(req.params.id)
     orm.readRow(`id > ${req.params.id}`, result => {
         res.json(result)
     })

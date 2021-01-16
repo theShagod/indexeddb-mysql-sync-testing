@@ -118,7 +118,7 @@ function getChanged (store, cb){
     
 }
 
-async function fetchPostDat(tx, entries){
+async function fetchPostDat(entries){
     await fetch('/', { 
         method: 'POST',
         headers: {
