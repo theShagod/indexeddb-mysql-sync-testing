@@ -1,5 +1,14 @@
 # TODO Offline-first App
 This is a website that you can log tasks and it will save our any number of apps.
+
+## Installation
+
+Download files and run:
+```
+npm install
+```
+This project uses mysql. Put your mysql database settings in `config/config.json`. The table name must be `tasks`.
+
 ## Features
  - background sync
  - works with multiple devices
