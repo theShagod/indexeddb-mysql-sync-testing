@@ -2,11 +2,11 @@ const db = require('./connection');
 const config = require('./config.json')['development']
 const {uTCtoLocal} = require('../ultilities/date')
 module.exports = {
-    tableExists: () => {
+    tableExists: (cb) => {
         //detect if table already exists
         db.query(
         `SELECT COUNT(*) as 'exists'
-        FROM information_schema.tables 
+        FROM information_schema.Tables 
         WHERE table_schema = '${config.database}' 
         AND table_name = 'tasks';`, (err, res) => {
             if (err) {
@@ -15,21 +15,24 @@ module.exports = {
             }
             if (!res[0].exists){
                 console.log('table does not exist')
+                cb(false)
             } else {
                 console.log('table exists')
+                cb(true)
             }
         })
     },
     generateTable: () => {
         db.query(
-            `CREATE TABLE tasks (
+            `CREATE TABLE ${config.database}.tasks (
                 id INT AUTO_INCREMENT,
                 name VARCHAR(255),
                 changed TINYINT(1) DEFAULT 0,
+                status VARCHAR(10) DEFAULT "none",
                 date_created DATETIME DEFAULT CURRENT_TIMESTAMP,
                 date_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY(id)
-            )`, (err, res, fields) => {
+            );`, (err, res, fields) => {
                 if (err) {
                     console.log(err)
                     return;
@@ -39,7 +42,7 @@ module.exports = {
     },
     createRow: (data, cb)=>{
         db.query(
-            `INSERT INTO indexeddb_mysql_syncing.tasks(id, name, changed, date_created, date_updated) VALUES (?, ?, ?, ?, ?)
+            `INSERT INTO ${config.database}.tasks(id, name, changed, date_created, date_updated) VALUES (?, ?, ?, ?, ?)
             `, [data.id, data.name, data.changed, data.date_created, data.date_updated], (err, res)=> {
                 if (err) {
                     console.log(err)
@@ -64,7 +67,7 @@ module.exports = {
         })
         entries = entries.slice(0, -1)
         db.query(
-            `INSERT INTO indexeddb_mysql_syncing.tasks(id, name, changed, status, date_created, date_updated) VALUES ${entries} ON DUPLICATE KEY UPDATE name = VALUES(name), changed = VALUES(changed), status = VALUES(status), date_updated = VALUES(date_updated)
+            `INSERT INTO ${config.database}.tasks(id, name, changed, status, date_created, date_updated) VALUES ${entries} ON DUPLICATE KEY UPDATE name = VALUES(name), changed = VALUES(changed), status = VALUES(status), date_updated = VALUES(date_updated)
             `, (err, res) => {
                 if (err) {
                     throw err
@@ -74,7 +77,7 @@ module.exports = {
     },
     readRow: (where = 'true = true', cb)=> {//default will do the full table
         db.query(
-            `SELECT * FROM indexeddb_mysql_syncing.tasks WHERE ${where}
+            `SELECT * FROM ${config.database}.tasks WHERE ${where}
             `,(err, res)=> {
                 if(err) {
                     console.log(err)
@@ -85,7 +88,7 @@ module.exports = {
     },
     updateRow: (name, id)=>{
         db.query(
-            `UPDATE indexeddb_mysql_syncing.tasks SET name = ?, date_updated = CURRENT_TIMESTAMP, current = 1 WHERE id = ?
+            `UPDATE ${config.database}.tasks SET name = ?, date_updated = CURRENT_TIMESTAMP, current = 1 WHERE id = ?
             `, [name, id], (err, res)=> {
                 if(err){
                     console.log(err)
@@ -96,7 +99,7 @@ module.exports = {
     },
     deleteRow: (id)=>{
         db.query(
-            `DELETE FROM indexeddb_mysql_syncing.tasks WHERE id = ?
+            `DELETE FROM ${config.database}.tasks WHERE id = ?
             `, [id], (err, res) => {
                 if (err){
                     console.log(err);

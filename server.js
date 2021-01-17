@@ -1,5 +1,5 @@
 const express = require('express');
-const { readRow } = require('./config/orm');
+const { readRow, tableExists, generateTable } = require('./config/orm');
 const app = express();
 const PORT = 5050;
 const orm = require('./config/orm')
@@ -24,11 +24,15 @@ app.post('/', (req, res)=> {
 
 app.get('/id/:id', (req, res)=> {
     orm.readRow(`id > ${req.params.id}`, result => {
+        console.log(result)
         res.json(result)
     })
 })
 
 app.listen(PORT, ()=>{
+    tableExists(itDoes => {
+        if(!itDoes) generateTable();
+    })
     console.log(`Listening to Port ${PORT}`);
     //corm.generateTable()
     //orm.createRow()

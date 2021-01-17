@@ -1,7 +1,7 @@
 function addEntry(db, name, cb){
     var tx = db.transaction('syncoff', 'readwrite')
     var store = tx.objectStore('syncoff')
-    var request = store.add({name: name, changed: 1, status: "new", date_created: new Date, date_updated: new Date})
+    var request = store.add({name: name, changed: 1, status: "none", date_created: new Date, date_updated: new Date})
     cb(request)
 }
 
@@ -10,7 +10,7 @@ function getAllEntries(db, cb){
     //add all names
     var tx = db.transaction('synco', 'readonly')
     var store = tx.objectStore('synco')
-    var request = store.index("by_status").openCursor(IDBKeyRange.bound("new","none",false, false))
+    var request = store.index("by_status").openCursor(IDBKeyRange.only("none"))
     var entries = []
     request.onsuccess = event => {
         var cursor = request.result
@@ -19,7 +19,7 @@ function getAllEntries(db, cb){
             entries.push(cursor.value)
             cursor.continue();
         } else {
-            var requestOff = db.transaction('syncoff', 'readonly').objectStore('syncoff').index("by_status").openCursor(IDBKeyRange.bound("new","none",false, false))
+            var requestOff = db.transaction('syncoff', 'readonly').objectStore('syncoff').index("by_status").openCursor(IDBKeyRange.only("none"))
             requestOff.onsuccess = event => {
                 var cursor = requestOff.result
                 if (cursor) {

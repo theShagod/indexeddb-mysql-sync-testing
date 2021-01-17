@@ -1,69 +1,45 @@
-need to connect to mysql database
-
-
-source of truth is mysql database
-user is online and adds entries which adds to both indexeddb and mysql
-When user goes offline, indexeddb data is shown
-user changes data which updates indexeddb data, 
-
-
-### Features
+# TODO Offline-first App
+This is a website that you can log tasks and it will save our any number of apps.
+## Features
  - background sync
  - works with multiple devices
  - offline use
+ - multiple devices
+ - service workers
+ - postMessage
+ - mySQL
+ - node + express
+ - JAWSDB
+ - indexedDB
  
 
-## Synchronization Proposal
+## Mysql database structure
+This app uses `synco` and `syncoff` objectstores. Entries that are not synced to remote mysql database are placed in `syncoff` until sync happens.
+-columns: `id`, `name`, `changed`, `status`, `date_created`,`date_updated`
 
-### user is online
-each entry has a `changed` column, defaults to `false`
-changing an entry does not change the `changed` column
+`status` - can only have `none`(default), `deleted`
 
+## How the Synchronization Works
 
-### user is offline
-changing an entry changes the `changed` column to `1`
-"deleting" an entry changes the `changed` column to `1` and `status` to `deleted`
-creating entries changes the `changed` column to `1` and doesn't change to `changed` if modified later
-`new` rows will have ids must 1000 times higher than the other rows to prevent conflicting ids
+Each entry has a `changed` column, defaults to `1`
+When the user clicks the sync button, all columns that have `changed` of `1` are changed to a value of `0` and added to the online database.
+If the user is offline, as soon at the user has internet connection, the sync will happen.
 
-### SYNCING, user goes from offline -> online
-indexeddb looks at the `changed` column to see if anything was changed. If something was changed, mysql will update itself
-If a indexedDB row has `deleted` in the `status` column, the data goes hidden from the user from both the indexeddb and mysql database
-created entries gives a `status` of `new` are deleted from indexeddb and then added to mysql to see what the id is, and then creates new entry in indexedDB so that the ids are matching
-
-
-### What if we have conflicting data sources
-For example, the user is offline and makes changes and then on different online device, what happens?
-time stamps and what is newer is used
+Clicking on an entry will "delete" the entry make it invisible. `status` changes to `deleted`. `status` is `none` by default.
 
 ### how much data is sent to indexeddb
-there is no limit to the amount of data on indexeddb
+there is no limit to the amount of data on indexeddb but there is a 5 mb restriction on the JAWSDB because I am using free subscription. Contact theshagod@gmail.com if you this product is useful and would like to see more development.
 
 
-### Mysql database structure
--columns: `id`, `name`, `changed`, `status`, `date_created`,`date_updated`
-each user has there only table
-
-`status` - can only have `none`(default), `deleted`, `new`
-
-
-### multiple devices
-If user offline creates a row, `status` `new` will appear and then doesn't sync and creates a `new` row online
-`new` rows are changed by being deleted and readded to indexeddb (after the online rows are synced)
-
-
-### on a new device or need to sync with new data in mysql
-
-
-### Syncing event order
+### Syncing method order
  1. get new entries in mysql by comparing id numbers add to `var entries` and add to `synco`
  2. open `syncoff` and `synco`
  3. get offline entries and add to `var entries` and add to `synco`
  4. get changed entries in `synco` and add to `var entries` (with ids so it puts instad of adds in mysql) and PUT to `synco`
  5. add `var entries` to mysql
- 6. clear `syncoff` and send `postMessage` to client that transaction is complete so that it can render the list again
+ 6. clear `syncoff` and send `postMessage` to client that transaction is complete so that it can `postMessage` to let client know to render the list again
 
 
-
-
- The most useful link about postmessage and service workers: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerGlobalScope/message_event
+### References
+ - Very useful indexeddb resource: https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
+ - The single most useful link about using postmessage with service workers: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerGlobalScope/message_event
