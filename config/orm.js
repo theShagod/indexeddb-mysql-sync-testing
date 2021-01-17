@@ -54,10 +54,11 @@ module.exports = {
         data.tasks.forEach(task => {
             let local_date_created = uTCtoLocal(task.date_created);
             let local_date_updated = uTCtoLocal(task.date_updated);
+            console.log(task.id)
             if (!task.id) { //if task.id is null
                 id = "null"
             } else {
-                id = toString(task.id)
+                id = task.id
             }
             entries +=`(${id}, "${task.name}", ${task.changed}, "${task.status}","${local_date_created}", "${local_date_updated}"),`
         })

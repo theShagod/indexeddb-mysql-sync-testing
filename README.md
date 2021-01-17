@@ -61,7 +61,9 @@ If user offline creates a row, `status` `new` will appear and then doesn't sync 
  3. get offline entries and add to `var entries` and add to `synco`
  4. get changed entries in `synco` and add to `var entries` (with ids so it puts instad of adds in mysql) and PUT to `synco`
  5. add `var entries` to mysql
- 6. clear `syncoff`
+ 6. clear `syncoff` and send `postMessage` to client that transaction is complete so that it can render the list again
 
- DELETING NEEDS OT BE CHANGED
- the id needs to be more specific like `synco1` and `syncoff1`
+
+
+
+ The most useful link about postmessage and service workers: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerGlobalScope/message_event

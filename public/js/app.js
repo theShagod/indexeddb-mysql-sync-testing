@@ -1,29 +1,43 @@
 import {renderList, syncButtonEventListener, submitEventListener, deleteEventListener} from './view.js';
 import {addEntry, getAllEntries, userDeleteEntry} from './model.js';
 (() => {
-
+    var db;
     //feature checking service worker and connecting sw
     if (navigator.serviceWorker){
         window.addEventListener('load', ()=> {
             navigator.serviceWorker.register('/sw.js').then(() => {
                 return navigator.serviceWorker.ready
             }).then(reg => {
+                reg.active.postMessage("Hi service worker");
+                //reg.active.postMessage("Hi service worker");
                 console.log('service worker registration is successful with scope of:', reg.scope)
                 syncButtonEventListener(()=> {
-                    reg.sync.register('example-sync').catch(msg => console.log('asdf',msg))
+                    
+                    console.log('sync button clicked')
+                    reg.sync.register('example-sync').then().catch(msg => console.log('asdf',msg))
+                    
                 });
-            }
-            ).catch(err=> {
+            }).catch(err=> {
                 console.log('There was an error registering service workers:', err)
             })
         })
+
+        navigator.serviceWorker.addEventListener('message', event => {
+            // event is a MessageEvent object
+            console.log(`SW says: ${event.data}`);
+            if (event.data === "renderList"){
+                getAllEntries(db, data => {
+                    if (data.length) renderList(data)
+                })
+            }
+        });
     }
     //feature checking indexedDB
     if (!window.indexedDB){
         console.log('no indexedDB support');
         return;
     }
-    var db;
+    
     //opening synco database
     var request = indexedDB.open('synco', 1);
     
@@ -65,8 +79,8 @@ import {addEntry, getAllEntries, userDeleteEntry} from './model.js';
         getAllEntries(db, data => {
             if (data.length) renderList(data)
         })
-        
-        
+        //console.log('TESTING: ', window.postMessage)
+        //console.log('TESTING: ', navigator.serviceWorker.postMessage)
         submitEventListener(name => {
             addEntry(db, name, request => {
                 request.onsuccess = event => {
@@ -76,13 +90,16 @@ import {addEntry, getAllEntries, userDeleteEntry} from './model.js';
                 }
             })
         })
-        deleteEventListener(id => {
-            userDeleteEntry(db, id, requestPut => {
+        deleteEventListener(idDOM => {
+            userDeleteEntry(db, idDOM, requestPut => {
                 requestPut.onsuccess = event => {
-                    console.log('user deleted entry of id:', id)
+                    console.log('user deleted entry of id tag:', idDOM)
                 }
             })
         })
     }
 
+
+
 })();
+

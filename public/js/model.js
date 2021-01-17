@@ -15,6 +15,7 @@ function getAllEntries(db, cb){
     request.onsuccess = event => {
         var cursor = request.result
         if (cursor) {
+            cursor.value.origin = "synco"
             entries.push(cursor.value)
             cursor.continue();
         } else {
@@ -22,6 +23,7 @@ function getAllEntries(db, cb){
             requestOff.onsuccess = event => {
                 var cursor = requestOff.result
                 if (cursor) {
+                    cursor.value.origin = "syncoff"
                     entries.push(cursor.value)
                     cursor.continue();    
                 } else {
@@ -35,9 +37,12 @@ function getAllEntries(db, cb){
     }
 }
 
-function userDeleteEntry(db, id, cb){
-    var tx = db.transaction('synco','readwrite')
-    var store = tx.objectStore('synco')
+function userDeleteEntry(db, idDOM, cb){
+    //id is the id of html 
+    var id = idDOM.match(/(?<=-).+$/)
+    var storeName = idDOM.match(/^.+(?=-)/)
+    var tx = db.transaction(['synco', 'syncoff'],'readwrite')
+    var store = tx.objectStore(storeName)
     var request = store.get(parseInt(id))
     request.onsuccess = event => {
         let entry = request.result

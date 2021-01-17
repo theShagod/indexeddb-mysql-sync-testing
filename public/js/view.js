@@ -7,7 +7,7 @@ function renderList(data){
     data.forEach(element => {
         let li = document.createElement('li')
         li.innerText = element.name
-        li.setAttribute('id', element.id)
+        li.setAttribute('id', `${element.origin}-${element.id}`)
         displayBox.append(li)
     });
 }

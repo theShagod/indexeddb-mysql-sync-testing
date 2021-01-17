@@ -5,7 +5,7 @@ var urlsToCache = [
     '/js/view.js',
     '/js/model.js'
 ]
-
+var client;
 
 self.addEventListener('install', event => {
     console.log('installing service workers')
@@ -17,6 +17,14 @@ self.addEventListener('install', event => {
     )
 })
 
+// in the service worker
+addEventListener('message', event => {
+    // event is an ExtendableMessageEvent object
+    //console.log(`Intializing postMessage: ${event.data}`);
+    console.log(`Intializing postMessage`);
+    event.source.postMessage("success!");
+    client = event.source
+  });
 
 
 self.addEventListener('fetch', event => {
@@ -103,6 +111,7 @@ function sendToServer(entries, cb) {
                 }
             })
             db.transaction('synco').oncomplete = event => {
+                client.postMessage("renderList");
                 console.log('transaction complete')
             }
             db.onerror = err => {
@@ -182,6 +191,7 @@ self.onsync = event => {
     if (event.tag = 'example-sync'){
         event.waitUntil(sendFromServer().then(msg => {
             console.log('sync complete:', msg)
+            
         }).catch(err => {console.log('sync error:', err)})
         
         ); 
@@ -190,4 +200,5 @@ self.onsync = event => {
     }
 
 }
+
 
