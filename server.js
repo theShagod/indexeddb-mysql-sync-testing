@@ -1,7 +1,7 @@
 const express = require('express');
 const { readRow, tableExists, generateTable } = require('./config/orm');
 const app = express();
-const PORT = 5050;
+const PORT = process.env.PORT || 5050;
 const orm = require('./config/orm')
 
 app.use(express.json());

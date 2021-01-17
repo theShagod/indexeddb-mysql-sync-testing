@@ -52,3 +52,7 @@ there is no limit to the amount of data on indexeddb but there is a 5 mb restric
 ### References
  - Very useful indexeddb resource: https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
  - The single most useful link about using postmessage with service workers: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerGlobalScope/message_event
+
+ ### Note to self
+
+When deploying don't forget to use process.env.PORT || hardportnumberhere or heroku will crash. Source: https://stackoverflow.com/questions/14322989/first-heroku-deploy-failed-error-code-h10
