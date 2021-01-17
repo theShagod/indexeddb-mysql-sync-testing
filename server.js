@@ -30,9 +30,10 @@ app.get('/id/:id', (req, res)=> {
 })
 
 app.listen(PORT, ()=>{
+    /*
     tableExists(itDoes => {
         if(!itDoes) generateTable();
-    })
+    })*/
     console.log(`Listening to Port ${PORT}`);
     //corm.generateTable()
     //orm.createRow()

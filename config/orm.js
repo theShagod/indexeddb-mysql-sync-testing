@@ -24,7 +24,7 @@ module.exports = {
     },
     generateTable: () => {
         db.query(
-            `CREATE TABLE ${config.database}.tasks (
+            `CREATE TABLE tasks (
                 id INT AUTO_INCREMENT,
                 name VARCHAR(255),
                 changed TINYINT(1) DEFAULT 0,
@@ -42,7 +42,7 @@ module.exports = {
     },
     createRow: (data, cb)=>{
         db.query(
-            `INSERT INTO ${config.database}.tasks(id, name, changed, date_created, date_updated) VALUES (?, ?, ?, ?, ?)
+            `INSERT INTO tasks(id, name, changed, date_created, date_updated) VALUES (?, ?, ?, ?, ?)
             `, [data.id, data.name, data.changed, data.date_created, data.date_updated], (err, res)=> {
                 if (err) {
                     console.log(err)
@@ -67,7 +67,7 @@ module.exports = {
         })
         entries = entries.slice(0, -1)
         db.query(
-            `INSERT INTO ${config.database}.tasks(id, name, changed, status, date_created, date_updated) VALUES ${entries} ON DUPLICATE KEY UPDATE name = VALUES(name), changed = VALUES(changed), status = VALUES(status), date_updated = VALUES(date_updated)
+            `INSERT INTO tasks(id, name, changed, status, date_created, date_updated) VALUES ${entries} ON DUPLICATE KEY UPDATE name = VALUES(name), changed = VALUES(changed), status = VALUES(status), date_updated = VALUES(date_updated)
             `, (err, res) => {
                 if (err) {
                     throw err
@@ -77,7 +77,7 @@ module.exports = {
     },
     readRow: (where = 'true = true', cb)=> {//default will do the full table
         db.query(
-            `SELECT * FROM ${config.database}.tasks WHERE ${where}
+            `SELECT * FROM tasks WHERE ${where}
             `,(err, res)=> {
                 if(err) {
                     console.log(err)
@@ -88,7 +88,7 @@ module.exports = {
     },
     updateRow: (name, id)=>{
         db.query(
-            `UPDATE ${config.database}.tasks SET name = ?, date_updated = CURRENT_TIMESTAMP, current = 1 WHERE id = ?
+            `UPDATE tasks SET name = ?, date_updated = CURRENT_TIMESTAMP, current = 1 WHERE id = ?
             `, [name, id], (err, res)=> {
                 if(err){
                     console.log(err)
@@ -99,7 +99,7 @@ module.exports = {
     },
     deleteRow: (id)=>{
         db.query(
-            `DELETE FROM ${config.database}.tasks WHERE id = ?
+            `DELETE FROM tasks WHERE id = ?
             `, [id], (err, res) => {
                 if (err){
                     console.log(err);
